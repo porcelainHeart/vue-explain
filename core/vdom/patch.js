@@ -41,13 +41,13 @@ const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 /**
  * 判断两个节点是否为相似节点
  * 一个DOM节点创建 性能开销是巨大的,vue会尽可能的避免DOM的创建与销毁
- * 在触发更新Vdom对比时, 如果vue发现新旧两个节点是相似节点, 会去修改旧节点的属性使之变为新节点, 而不是删除后创建新节点
+ * 当数据变更,触发更新,Vdom对比时, 如果vue发现新旧两个节点是相似节点, 会去修改旧节点的属性使之变为新节点, 而不是删除后创建新节点
  * 相似节点的定义很简单
  * 首先新旧节点的key必须相同
  * 同时新旧节点的tag必须相同
  * 新旧节点要么都是注释节点, 要么都不是注释节点
  * 新旧节点要么都有data属性, 或者都没有data
- * 当新旧节点是input类型时, 还必须拥有相同的type, 比如都是type="number" 或者 "tel" 等等
+ * 当新旧节点是input类型时, 还必须拥有相同的type, 比如都是type="file" 或者 "button" 等等
  * 除了上述条件外, 如果旧节点是一个异步占位符, 并且新节点的工厂函数没有error字段, 并且新旧节点的工厂函数相同时
  * 也算作相似节点
  * 
@@ -93,6 +93,9 @@ function sameInputType (a, b) {
   return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
 }
 
+/**
+ * 对有key的节点生成一个映射表, 后面diff算法需要用到
+ */
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
   const map = {}
@@ -103,6 +106,9 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
+/**
+ * 创建patch方法
+ */
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
