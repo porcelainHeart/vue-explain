@@ -28,10 +28,32 @@ import {
   isPrimitive
 } from '../util/index'
 
+/**
+ * 一个空节点,后面会经常用到
+ */ 
 export const emptyNode = new VNode('', {}, [])
 
+/**
+ * 生命周期枚举, 后面触发生命周期钩子用到
+ */ 
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
+/**
+ * 判断两个节点是否为相似节点
+ * 一个DOM节点创建 性能开销是巨大的,vue会尽可能的避免DOM的创建与销毁
+ * 在触发更新Vdom对比时, 如果vue发现新旧两个节点是相似节点, 会去修改旧节点的属性使之变为新节点, 而不是删除后创建新节点
+ * 相似节点的定义很简单
+ * 首先新旧节点的key必须相同
+ * 同时新旧节点的tag必须相同
+ * 新旧节点要么都是注释节点, 要么都不是注释节点
+ * 新旧节点要么都有data属性, 或者都没有data
+ * 当新旧节点是input类型时, 还必须拥有相同的type, 比如都是type="number" 或者 "tel" 等等
+ * 除了上述条件外, 如果旧节点是一个异步占位符, 并且新节点的工厂函数没有error字段, 并且新旧节点的工厂函数相同时
+ * 也算作相似节点
+ * 
+ * 相似节点只有这两种情况, 条件看似比较多, 实际上在列表渲染时特别容易出现新旧节点是相似节点的情况
+ * 所以vue会强烈推荐使用key, 添加了key后, 可以使大量的节点变动通过更新属性的方式进行, 而不是大面积的新增替换
+ */
 function sameVnode (a, b) {
   return (
     a.key === b.key && (
@@ -49,6 +71,20 @@ function sameVnode (a, b) {
   )
 }
 
+/**
+ * 判断是否是相同类型的input节点, 供上面的sameVnode方法使用
+ * 因为在判断sameInputType之前, 已经判断过新旧节点的tag是否一致
+ * 所以如果旧节点不是input节点, 那么与这个函数无关, 直接返回true
+ * 这里的i连续赋值其实是比较蛋疼的写法, 感觉可读性比较一般, 简单翻译一下就是
+ * 判断a.data.attrs.type 是否与 b.data.attrs.type 相同
+ * 但是这里并不是严格要求必须一致, 比如text和number也被算作同一种类型
+ * 这种宽容的处理在isTextInputType中进行, isTextInputType是来自'web/util/element'的一个工具方法
+ * 这个方法没有在本项目中, 这里粘贴一下isTextInputType的代码, 只有一行:
+ * export const isTextInputType = makeMap('text,number,password,search,email,tel,url')
+ * makeMap方法来自shared/util.js  用处是生成一个校验方法, 用于判断值是否在传入makeMap的参数组成的数组中
+ * 所以当type是text,number,password,search,email,tel,url这些类型时, 都会被算作是相同的type
+ * 这几种type本质上都是文本类型的input, 只要新旧节点都是这7种type之一, sameInputType都会返回true
+ */
 function sameInputType (a, b) {
   if (a.tag !== 'input') return true
   let i
