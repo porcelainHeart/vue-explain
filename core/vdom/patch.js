@@ -146,6 +146,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 通过vnode的tag判断是否是原生dom标签或者组件标签
+   * 用于创建真实DOM节点时, 预先判断tag的合法性
+   */
   function isUnknownElement (vnode, inVPre) {
     return (
       !inVPre &&
@@ -722,30 +726,43 @@ export function createPatchFunction (backend) {
       return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
-
+  /**
+   * 这里返回一个patch函数供后续对vnode进行patch操作
+   * 这里的patch操作是指, 将oldVnode对应的真实DOM更改为vnode对应的真实DOM, 所需要的最低性能开销的操作(或者说是较低)
+   * 参数中的oldVnode是更新前的旧节点, vnode是将要更新的新节点, hydrating是一个flag标识是否与原生DOM混合, removeOnly是在过渡动画中使用
+   */
   return function patch (oldVnode, vnode, hydrating, removeOnly, parentElm, refElm) {
+    // 这里很简单, 如果新节点不存在, 旧节点也不存在, 无需任何操作, 如果新节点不存在,但旧节点存在, 说明需要删除旧节点, 调用一个销毁钩子
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }
 
+    // 用于标识是否初始化这个节点
     let isInitialPatch = false
     const insertedVnodeQueue = []
-
+    
+    // 旧节点不存在 说明需要创建一个新节点
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue, parentElm, refElm)
     } else {
+      // 走到这里 说明新旧节点都存在, 这时比较复杂, 分几种情况处理 
+      // 先通过nodeType判断是否是真正的节点, 真正的节点nodeType取值范围是1~12
+      // vue里常用的基本只有三种 1代表是dom元素节点 3是文本节点 8是注释节点
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
+        // 常规情况下, 新旧节点是相似节点, 对新旧节点做详细的对比操作
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
       } else {
         if (isRealElement) {
+          // 当新旧节点不是相似节点, 旧节点是一个真实节点时
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
+          // 服务端渲染特殊处理
           if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
             oldVnode.removeAttribute(SSR_ATTR)
             hydrating = true
