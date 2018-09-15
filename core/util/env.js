@@ -1,9 +1,11 @@
 /* @flow */
 
 // can we use __proto__?
+// 判断浏览器是否支持__proto__这个非标准属性
 export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
+// 通过UA判断各种浏览器
 export const inBrowser = typeof window !== 'undefined'
 export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
 export const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase()
@@ -16,6 +18,7 @@ export const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform ==
 export const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge
 
 // Firefox has a "watch" function on Object.prototype...
+// Firefox自作聪明加了个watch属性 这个自带的watch其实引发了不少问题
 export const nativeWatch = ({}).watch
 
 export let supportsPassive = false
@@ -34,6 +37,7 @@ if (inBrowser) {
 
 // this needs to be lazy-evaled because vue may be required before
 // vue-server-renderer can set VUE_ENV
+// 判断是否在服务端
 let _isServer
 export const isServerRendering = () => {
   if (_isServer === undefined) {
@@ -57,10 +61,12 @@ export function isNative (Ctor: any): boolean {
   return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
 
+// 判断是否完全支持Symbol和Reflect
 export const hasSymbol =
   typeof Symbol !== 'undefined' && isNative(Symbol) &&
   typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys)
 
+// 自己搞了一个非标准的Set, 和原生Set的区别是只支持number/string类型的key
 let _Set
 /* istanbul ignore if */ // $flow-disable-line
 if (typeof Set !== 'undefined' && isNative(Set)) {
@@ -85,6 +91,7 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   }
 }
 
+// 用于实现一个非标准Set
 interface SimpleSet {
   has(key: string | number): boolean;
   add(key: string | number): mixed;
