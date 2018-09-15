@@ -56,7 +56,7 @@
 │   ├── env.js
 │   ├── error.js
 │   ├── index.js
-│   ├── lang.js
+│   ├── lang.js ------------------------------------- 已完成
 │   ├── next-tick.js
 │   ├── options.js
 │   ├── perf.js
