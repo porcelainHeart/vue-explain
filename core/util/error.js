@@ -4,6 +4,7 @@ import config from '../config'
 import { warn } from './debug'
 import { inBrowser, inWeex } from './env'
 
+// 捕获错误
 export function handleError (err: Error, vm: any, info: string) {
   if (vm) {
     let cur = vm
@@ -24,6 +25,7 @@ export function handleError (err: Error, vm: any, info: string) {
   globalHandleError(err, vm, info)
 }
 
+// 如果开启了errorHandler 会统一在这里处理错误
 function globalHandleError (err, vm, info) {
   if (config.errorHandler) {
     try {
@@ -35,6 +37,7 @@ function globalHandleError (err, vm, info) {
   logError(err, vm, info)
 }
 
+// 在非生产环境打印log
 function logError (err, vm, info) {
   if (process.env.NODE_ENV !== 'production') {
     warn(`Error in ${info}: "${err.toString()}"`, vm)
