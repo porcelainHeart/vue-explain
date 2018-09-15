@@ -59,7 +59,7 @@
 │   ├── lang.js ------------------------------------- 已完成
 │   ├── next-tick.js
 │   ├── options.js
-│   ├── perf.js
+│   ├── perf.js ------------------------------------- 已完成
 │   └── props.js
 └── vdom
     ├── create-component.js
