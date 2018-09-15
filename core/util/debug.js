@@ -25,6 +25,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
+  // 打印警告
   tip = (msg, vm) => {
     if (hasConsole && (!config.silent)) {
       console.warn(`[Vue tip]: ${msg}` + (
@@ -33,6 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
+  // 用于报错时打印组件名
   formatComponentName = (vm, includeFile) => {
     if (vm.$root === vm) {
       return '<Root>'
@@ -55,6 +57,7 @@ if (process.env.NODE_ENV !== 'production') {
     )
   }
 
+  // 很花哨的生成重复字符串方法, 其实只是用来给后面打印的log加空格....
   const repeat = (str, n) => {
     let res = ''
     while (n) {
@@ -65,6 +68,7 @@ if (process.env.NODE_ENV !== 'production') {
     return res
   }
 
+  // 生成一个组件栈字符串用于打印错误信息
   generateComponentTrace = vm => {
     if (vm._isVue && vm.$parent) {
       const tree = []
