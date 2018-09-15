@@ -128,6 +128,11 @@ export function createPatchFunction (backend) {
     return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
 
+  /**
+   * 创建一个回调方法, 用于删除节点
+   * 
+   * 
+   */
   function createRmCb (childElm, listeners) {
     function remove () {
       if (--remove.listeners === 0) {
@@ -168,6 +173,7 @@ export function createPatchFunction (backend) {
 
   let creatingElmInVPre = 0
 
+  // 创建一个节点
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -177,6 +183,7 @@ export function createPatchFunction (backend) {
     ownerArray,
     index
   ) {
+    // 节点已经被渲染, 需要使用一个克隆节点
     if (isDef(vnode.elm) && isDef(ownerArray)) {
       // This vnode was used in a previous render!
       // now it's used as a new node, overwriting its elm would cause
@@ -186,6 +193,7 @@ export function createPatchFunction (backend) {
       vnode = ownerArray[index] = cloneVNode(vnode)
     }
 
+    // 创建组件节点 详见本文件中的createComponent方法
     vnode.isRootInsert = !nested // for transition enter check
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
@@ -194,6 +202,11 @@ export function createPatchFunction (backend) {
     const data = vnode.data
     const children = vnode.children
     const tag = vnode.tag
+    /**
+     * 如果要创建的节点有tag属性, 这里做一下校验
+     * 如果该节点上面有v-pre指令, 直接给flag加1
+     * 如果没有v-pre需要调用isUnknownElement判断标签是否合法, 然后给出警告
+     */
     if (isDef(tag)) {
       if (process.env.NODE_ENV !== 'production') {
         if (data && data.pre) {
@@ -252,7 +265,10 @@ export function createPatchFunction (backend) {
       insert(parentElm, vnode.elm, refElm)
     }
   }
-
+  /**
+   * 创建组件
+   * 如果组件实例已经存在, 只需要初始化组件并重新激活组件即可
+   */
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
@@ -274,6 +290,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 初始化组件
+   * 主要的操作是已插入的vnode队列, 触发create钩子, 设置style的scope, 注册ref
+   */
   function initComponent (vnode, insertedVnodeQueue) {
     if (isDef(vnode.data.pendingInsert)) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
@@ -292,6 +312,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 激活组件
+   */
   function reactivateComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i
     // hack for #4339: a reactivated component with inner transition
@@ -314,6 +337,9 @@ export function createPatchFunction (backend) {
     insert(parentElm, vnode.elm, refElm)
   }
 
+  /**
+   * 插入节点, 有父节点的插入到前面, 没有的插入到后面
+   */
   function insert (parent, elm, ref) {
     if (isDef(parent)) {
       if (isDef(ref)) {
@@ -403,6 +429,10 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 删除多个节点
+   * 文本节点可以直接删除, 其他节点需要触发两个钩子
+   */
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       const ch = vnodes[startIdx]
@@ -518,6 +548,11 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 检查是否有重复的key
+   * 一个很简单的遍历查找重复值的操作
+   * 其实这个seenKeys我觉得改成数组会更好, 写成object又给每个key的value置为true蛮奇怪的
+   */
   function checkDuplicateKeys (children) {
     const seenKeys = {}
     for (let i = 0; i < children.length; i++) {
@@ -536,6 +571,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 在旧的子节点列表寻找相似节点(只查找第一个)
+   */
   function findIdxInOld (node, oldCh, start, end) {
     for (let i = start; i < end; i++) {
       const c = oldCh[i]
