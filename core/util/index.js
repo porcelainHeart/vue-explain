@@ -1,5 +1,5 @@
 /* @flow */
-
+// 集中导出所有工具方法
 export * from 'shared/util'
 export * from './lang'
 export * from './env'
