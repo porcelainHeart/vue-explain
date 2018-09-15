@@ -8,6 +8,7 @@ import { isIOS, isNative } from './env'
 const callbacks = []
 let pending = false
 
+// 执行所有的回调函数并清空回调函数列表
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)
@@ -34,6 +35,8 @@ let useMacroTask = false
 // in IE. The only polyfill that consistently queues the callback after all DOM
 // events triggered in the same loop is by using MessageChannel.
 /* istanbul ignore if */
+// 在环境支持的情况下 优先使用setImmediate作为宏任务处理方法
+// 不支持setImmediate就使用MessageChannel, 还不支持就用setTimeout
 if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   macroTimerFunc = () => {
     setImmediate(flushCallbacks)
@@ -58,6 +61,7 @@ if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
 
 // Determine microtask defer implementation.
 /* istanbul ignore next, $flow-disable-line */
+// 统一用promise.resolve作为微任务处理, 不支持promise就换成宏任务
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   microTimerFunc = () => {
@@ -67,6 +71,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     // microtask queue but the queue isn't being flushed, until the browser
     // needs to do some other work, e.g. handle a timer. Therefore we can
     // "force" the microtask queue to be flushed by adding an empty timer.
+    // IOS的旧版webview神奇BUG
     if (isIOS) setTimeout(noop)
   }
 } else {
@@ -78,6 +83,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
  * Wrap a function so that if any code inside triggers state change,
  * the changes are queued using a (macro) task instead of a microtask.
  */
+// 有些情况下需要强制使用宏任务处理, 就用这个方法包一下
 export function withMacroTask (fn: Function): Function {
   return fn._withTask || (fn._withTask = function () {
     useMacroTask = true
@@ -87,6 +93,7 @@ export function withMacroTask (fn: Function): Function {
   })
 }
 
+// 把回调推到下一个事件循环执行
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {
