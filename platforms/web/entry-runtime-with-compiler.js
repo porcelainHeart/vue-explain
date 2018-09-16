@@ -14,7 +14,13 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+/**
+ * 报错之前的$mount的方法以便后面返回实例，
+ */
 const mount = Vue.prototype.$mount
+/**
+ * 手动地挂载一个未挂载的实例，并返回实例自身(Vue实例)
+ */
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -22,6 +28,9 @@ Vue.prototype.$mount = function (
   el = el && query(el)
 
   /* istanbul ignore if */
+  /**
+   * 挂载对象不能为body和html标签
+   */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
@@ -31,6 +40,11 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  /**
+   * 判断$options是否有render方法
+   * 有：判断是String还是Element，获取他们的innerHTMl
+   * 无：再实例Vue的时候报错 见 lifecycle.js
+   */
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -45,6 +59,10 @@ Vue.prototype.$mount = function (
             )
           }
         }
+      /**
+       * 获取的Element的类型
+       * 详细见   https://developer.mozilla.org/zh-CN/docs/Web/API/Element/outerHTML
+       */
       } else if (template.nodeType) {
         template = template.innerHTML
       } else {
@@ -84,6 +102,10 @@ Vue.prototype.$mount = function (
 /**
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
+ */
+/**
+ * 关于outHTML的介绍见 https://developer.mozilla.org/zh-CN/docs/Web/API/Element/outerHTML
+ * 获取绑定的el的html的结构
  */
 function getOuterHTML (el: Element): string {
   if (el.outerHTML) {
