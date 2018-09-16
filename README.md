@@ -60,7 +60,7 @@
 │   ├── next-tick.js -------------------------------- 已完成
 │   ├── options.js
 │   ├── perf.js ------------------------------------- 已完成
-│   └── props.js
+│   └── props.js ------------------------------------ 已完成
 └── vdom
     ├── create-component.js
     ├── create-element.js
