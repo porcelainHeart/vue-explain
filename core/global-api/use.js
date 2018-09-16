@@ -1,7 +1,7 @@
 /* @flow */
 
 import { toArray } from '../util/index'
-
+// 提供Vue.use API 用于安装Vue插件, 安装插件前会先检查插件是否已存在
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
