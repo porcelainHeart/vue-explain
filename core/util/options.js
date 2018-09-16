@@ -25,11 +25,13 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
+// 提供合并配置对象的方法
 const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
  */
+// vue没实例化之前调用会报错
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
@@ -45,6 +47,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper that recursively merges two data objects together.
  */
+// 两个对象数据合并, 感觉和Object.assign没多少区别
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
@@ -65,6 +68,7 @@ function mergeData (to: Object, from: ?Object): Object {
 /**
  * Data
  */
+// 合并data对象
 export function mergeDataOrFn (
   parentVal: any,
   childVal: any,
@@ -107,6 +111,7 @@ export function mergeDataOrFn (
   }
 }
 
+// 声明data对象的合并方法
 strats.data = function (
   parentVal: any,
   childVal: any,
@@ -132,6 +137,7 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+// 生命周期钩子合并
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -252,6 +258,7 @@ function checkComponents (options: Object) {
   }
 }
 
+// 校验组件名字是否合法 是否与HTML标准tag名重复
 export function validateComponentName (name: string) {
   if (!/^[a-zA-Z][\w-]*$/.test(name)) {
     warn(
@@ -272,6 +279,7 @@ export function validateComponentName (name: string) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
+// 获取props同时校验props语法是否正确(必须是Array或者Object, 如果写成数组则每个prop都需要是String)
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
   if (!props) return
@@ -309,6 +317,7 @@ function normalizeProps (options: Object, vm: ?Component) {
 /**
  * Normalize all injections into Object-based format
  */
+// 获取所有依赖注入字段
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
   if (!inject) return
@@ -336,6 +345,7 @@ function normalizeInject (options: Object, vm: ?Component) {
 /**
  * Normalize raw function directives into object format.
  */
+// 获取指令
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
   if (dirs) {
@@ -348,6 +358,7 @@ function normalizeDirectives (options: Object) {
   }
 }
 
+// 校验是否是Object类型
 function assertObjectType (name: string, value: any, vm: ?Component) {
   if (!isPlainObject(value)) {
     warn(
@@ -362,6 +373,7 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 合并组件的配置项
 export function mergeOptions (
   parent: Object,
   child: Object,
@@ -375,6 +387,7 @@ export function mergeOptions (
     child = child.options
   }
 
+  // 序列化props, inject, directive
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
@@ -382,11 +395,13 @@ export function mergeOptions (
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  // child的mixins加入parent中
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
+  // 使用strat中的合并方法去依次合并配置对象
   const options = {}
   let key
   for (key in parent) {
@@ -419,6 +434,7 @@ export function resolveAsset (
   if (typeof id !== 'string') {
     return
   }
+  // 把id转换成小驼峰和大驼峰命名去判断是否相等
   const assets = options[type]
   // check local registration variations first
   if (hasOwn(assets, id)) return assets[id]
