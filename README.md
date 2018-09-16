@@ -19,8 +19,8 @@
 │   └── keep-alive.js
 ├── config.js
 ├── global-api
-│   ├── assets.js
-│   ├── extend.js
+│   ├── assets.js -------------------------------- 已完成
+│   ├── extend.js -------------------------------- 已完成
 │   ├── index.js
 │   ├── mixin.js
 │   └── use.js
