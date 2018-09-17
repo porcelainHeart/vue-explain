@@ -42,7 +42,7 @@
 │   │   ├── resolve-filter.js
 │   │   └── resolve-slots.js
 │   ├── render.js
-│   └── state.js
+│   └── state.js --------------------------------- 进行中
 ├── observer
 │   ├── array.js
 │   ├── dep.js
