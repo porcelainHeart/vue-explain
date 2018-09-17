@@ -18,6 +18,9 @@ function createFunction (code, errors) {
 }
 
 export function createCompileToFunctionFn (compile: Function): Function {
+  /**
+   * 用于缓存
+   */
   const cache = Object.create(null)
 
   return function compileToFunctions (
@@ -25,6 +28,10 @@ export function createCompileToFunctionFn (compile: Function): Function {
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
+    /**
+     * 将拷贝options的value 到新对象
+     * 理解成Object.assign()
+     */
     options = extend({}, options)
     const warn = options.warn || baseWarn
     delete options.warn
@@ -32,6 +39,9 @@ export function createCompileToFunctionFn (compile: Function): Function {
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
       // detect possible CSP restriction
+      /**
+       * 禁止eval()函数
+       */
       try {
         new Function('return 1')
       } catch (e) {
@@ -48,6 +58,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    // 从缓存取值
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
