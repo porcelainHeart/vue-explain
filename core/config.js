@@ -10,25 +10,41 @@ import { LIFECYCLE_HOOKS } from 'shared/constants'
 
 export type Config = {
   // user
+  // 合并策略
   optionMergeStrategies: { [key: string]: Function };
+  // 是否打印警告log
   silent: boolean;
+  // 在启动时显示生产模式提示信息
   productionTip: boolean;
+  // 是否开启性能记录功能
   performance: boolean;
+  // 是否开启devtools
   devtools: boolean;
+  // 是否捕获全局的错误
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
+  // 是否捕获全局的警告
   warnHandler: ?(msg: string, vm: Component, trace: string) => void;
+  // 要特殊忽略的元素
   ignoredElements: Array<string | RegExp>;
+  // 键盘事件别名
   keyCodes: { [key: string]: number | Array<number> };
 
   // platform
+  // 是否检查保留字tag, 用于避免与原生tag冲突
   isReservedTag: (x?: string) => boolean;
+  // 是否检查保留属性
   isReservedAttr: (x?: string) => boolean;
+  // 解析特定平台的标签名
   parsePlatformTagName: (x: string) => string;
+  // 检查tag是否是未知元素
   isUnknownElement: (x?: string) => boolean;
+  // 获取tag的命名空间
   getTagNamespace: (x?: string) => string | void;
+  // 检查属性是否必须用prop绑定
   mustUseProp: (tag: string, type: ?string, name: string) => boolean;
 
   // legacy
+  // 生命周期钩子枚举
   _lifecycleHooks: Array<string>;
 };
 
