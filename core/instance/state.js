@@ -28,6 +28,7 @@ import {
   isReservedAttribute
 } from '../util/index'
 
+// 用于定义一个可枚举可配置的属性描述符, noop是一个function占位符, 可以代表任意操作
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
@@ -35,6 +36,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// 修改一个属性的get set方法, 用于把props, data中的字段代理到vm实例上
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -45,6 +47,11 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+/**
+ * 初始化组件的状态
+ * 在Vue实例化时会调用_init方法, 在_init内会调用initState方法来初始化组件状态
+ * 显然这里是对props、methods、data、computed、watch做了初始化操作
+ */
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -56,6 +63,8 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
+  // 这里需要额外判断一下opts.watch !== nativeWatch
+  // 是因为在Firefox下, Object实例上会有一个自带的watch属性, 需要判断这个watch必须是vue提供的watch
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
@@ -69,15 +78,18 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
+  // 使用toggleObserving可以设置shouldObserve为参数的值, 这里设为false是阻止观察者响应更新, 直到props初始化结束
   if (!isRoot) {
     toggleObserving(false)
   }
+  // 遍历所有props选项, 并校验props
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       const hyphenatedKey = hyphenate(key)
+      // 如果使用了保留属性, 这里会报错, 保留属性包括key,ref,slot,slot-scope,is
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
         warn(
@@ -85,6 +97,8 @@ function initProps (vm: Component, propsOptions: Object) {
           vm
         )
       }
+      // isUpdatingChildComponent会在组件开始更新时置为true, 完成更新时置为false
+      // 如果子组件中更改一个props时会导致父组件也重新渲染, 这里就会抛出警告
       defineReactive(props, key, value, () => {
         if (vm.$parent && !isUpdatingChildComponent) {
           warn(
@@ -97,20 +111,33 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 使props变为响应式属性
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 将props都代理到vm实例上, 以便代码中可以通过this.propName去访问到对应的props
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
   }
+  // 初始化完毕, 开启响应式更新
   toggleObserving(true)
 }
 
+/**
+ * data初始化, 和props基本一致
+ */
 function initData (vm: Component) {
   let data = vm.$options.data
+  /**
+   * data字段有两种可选类型
+   * 当data是function时, 直接执行这个function 并将返回值作为data
+   * data也可以直接就是一个object, 但仅应该在root组件这样做, 因为直接使用data对象会导致多个相同的组件持有同一个data对象的引用
+   * 而使用一个返回新对象的function就可以避免这个问题
+   * 详见 https://cn.vuejs.org/v2/style-guide/#%E7%BB%84%E4%BB%B6%E6%95%B0%E6%8D%AE-%E5%BF%85%E8%A6%81
+   */
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
@@ -123,6 +150,8 @@ function initData (vm: Component) {
     )
   }
   // proxy data on instance
+  // 将data的每个字段都代理到vm实例上, 并判断是否与methods, props冲突, 重复key会报错
+  // 吐槽一下, 同一个文件里一会for一会while的, 估计不是同一个人写的...
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
@@ -143,11 +172,13 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
+    // 同样要判断是否错误的用了保留key
     } else if (!isReserved(key)) {
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // 使data变为响应式
   observe(data, true /* asRootData */)
 }
 

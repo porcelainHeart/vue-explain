@@ -117,6 +117,7 @@ export const isBuiltInTag = makeMap('slot,component', true)
 /**
  * Check if a attribute is a reserved attribute.
  */
+// 保留属性, 这些属性不能作为props, data等的字段
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 /**
@@ -245,6 +246,7 @@ export function toObject (arr: Array<any>): Object {
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
  */
+// 一个function占位符, 可以指代任意操作, 类似于python里的pass
 export function noop (a?: any, b?: any, c?: any) {}
 
 /**

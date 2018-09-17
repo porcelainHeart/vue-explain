@@ -5,6 +5,7 @@ import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
+// Vue构造函数必须使用new关键字实例化, 否则会抛出一个警告, 实例化Vue的时候会调用_init方法初始化
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)

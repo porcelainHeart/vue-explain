@@ -12,10 +12,13 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
+// 向Vue.prototype添加_init方法, 用于new Vue时 初始化一些配置项
+// 主要的功能是合并配置项, 初始化生命周期, 事件, 组件, 指令等等
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
+    // 使用uid来区分不同的vue实例, 以便后面的缓存功能使用
     vm._uid = uid++
 
     let startTag, endTag
@@ -48,6 +51,7 @@ export function initMixin (Vue: Class<Component>) {
       vm._renderProxy = vm
     }
     // expose real self
+    // 依次初始化配置项, 并调用生命周期钩子
     vm._self = vm
     initLifecycle(vm)
     initEvents(vm)
@@ -58,6 +62,7 @@ export function initMixin (Vue: Class<Component>) {
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 
+    // 用于性能监控
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
@@ -65,15 +70,17 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    // 配置项里有el属性, 则会挂载到真实DOM上, 完成视图的渲染
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
   }
 }
-
+// 初始化组件时添加一些配置项
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
+  // ???比动态枚举快?, 这能快多少呢, 说实话不是很理解这种做法, 不如写得简洁一些
   const parentVnode = options._parentVnode
   opts.parent = options.parent
   opts._parentVnode = parentVnode
