@@ -6,7 +6,7 @@ export const hasProto = '__proto__' in {}
 
 // Browser environment sniffing
 // 通过UA判断各种浏览器
-export const inBrowser = typeof window !== 'undefined'
+export const inBrowser = typeof window !== 'undefined' // 这可用于检测代码是否在典型的浏览器环境
 export const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
 export const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase()
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()

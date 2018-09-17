@@ -15,11 +15,11 @@ const idToTemplate = cached(id => {
 })
 
 /**
- * 报错之前的$mount的方法以便后面返回实例，
+ * 缓存之前的$mount的方法以便后面返回实例，
  */
 const mount = Vue.prototype.$mount
 /**
- * 手动地挂载一个未挂载的实例，并返回实例自身(Vue实例)
+ * 手动地挂载一个未挂载的根元素，并返回实例自身(Vue实例)
  */
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -41,9 +41,9 @@ Vue.prototype.$mount = function (
   const options = this.$options
   // resolve template/el and convert to render function
   /**
-   * 判断$options是否有render方法
+   * 判断$options是否有render方法 
    * 有：判断是String还是Element，获取他们的innerHTMl
-   * 无：再实例Vue的时候报错 见 lifecycle.js
+   * 无：在实例Vue时候在vnode里创建一个创建一个空的注释节点 见方法createEmptyVNode
    */
   if (!options.render) {
     let template = options.template
@@ -76,6 +76,9 @@ Vue.prototype.$mount = function (
     }
     if (template) {
       /* istanbul ignore if */
+      /**
+       * 用于监控开始compile 的性能
+       */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
@@ -90,6 +93,9 @@ Vue.prototype.$mount = function (
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
+       /**
+       * 用于监控结束compile 的性能
+       */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
         measure(`vue ${this._name} compile`, 'compile', 'compile end')
