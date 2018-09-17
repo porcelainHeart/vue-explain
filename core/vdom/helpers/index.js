@@ -1,5 +1,5 @@
 /* @flow */
-
+// 导出所有辅助工具方法
 export * from './merge-hook'
 export * from './extract-props'
 export * from './update-listeners'

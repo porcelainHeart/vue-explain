@@ -66,9 +66,9 @@
     ├── create-functional-component.js
     ├── helpers
     │   ├── extract-props.js
-    │   ├── get-first-component-child.js
-    │   ├── index.js
-    │   ├── is-async-placeholder.js
+    │   ├── get-first-component-child.js ------------ 已完成
+    │   ├── index.js -------------------------------- 已完成
+    │   ├── is-async-placeholder.js ----------------- 已完成
     │   ├── merge-hook.js
     │   ├── normalize-children.js
     │   ├── resolve-async-component.js
