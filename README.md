@@ -42,10 +42,10 @@
 │   │   ├── resolve-filter.js
 │   │   └── resolve-slots.js
 │   ├── render.js
-│   └── state.js --------------------------------- 进行中
+│   └── state.js ------------------------------------ 进行中
 ├── observer
 │   ├── array.js
-│   ├── dep.js
+│   ├── dep.js -------------------------------------- 已完成
 │   ├── index.js
 │   ├── scheduler.js
 │   ├── traverse.js
