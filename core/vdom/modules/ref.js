@@ -2,6 +2,10 @@
 
 import { remove, isDef } from 'shared/util'
 
+/**
+ * ref操作
+ * 包括添加、更新、销毁
+ */
 export default {
   create (_: any, vnode: VNodeWithData) {
     registerRef(vnode)
@@ -17,6 +21,10 @@ export default {
   }
 }
 
+/**
+ * 注册ref
+ * 将ref加入进$refs，实现ref的上下文关联
+ */
 export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
   const key = vnode.data.ref
   if (!isDef(key)) return
@@ -31,6 +39,7 @@ export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
       refs[key] = undefined
     }
   } else {
+    //若配合v-for使用，则统一转成数组
     if (vnode.data.refInFor) {
       if (!Array.isArray(refs[key])) {
         refs[key] = [ref]
