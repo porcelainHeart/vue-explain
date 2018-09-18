@@ -95,6 +95,10 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+/**
+ * 缓存一个obj并返回一个取值函数用于判断val是否在obj中
+ * 在返回具体值，不在返回undefined
+ */
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean

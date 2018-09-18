@@ -61,16 +61,28 @@ export function createASTElement (
 /**
  * Convert HTML string to AST.
  */
+/**
+ * 解析templent转成AST
+ * AST意思可看： https://astexplorer.net/
+ */
 export function parse (
   template: string,
   options: CompilerOptions
 ): ASTElement | void {
+  /**
+   * 有自定义warn用自定义没有用基础： console.error(`[Vue compiler]: ${msg}`)
+   */
   warn = options.warn || baseWarn
-
+  // 检查标签是否需要保留空格
   platformIsPreTag = options.isPreTag || no
+  // 检查属性是否应被绑定
   platformMustUseProp = options.mustUseProp || no
+  // 检查标记的名称空间
   platformGetTagNamespace = options.getTagNamespace || no
 
+  /**
+   * 获取modules中的值
+   */
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -78,13 +90,16 @@ export function parse (
   delimiters = options.delimiters
 
   const stack = []
+  // 是否保留elements直接的空白
   const preserveWhitespace = options.preserveWhitespace !== false
   let root
   let currentParent
   let inVPre = false
   let inPre = false
   let warned = false
-
+  /**
+   * 单次警告
+   */
   function warnOnce (msg) {
     if (!warned) {
       warned = true

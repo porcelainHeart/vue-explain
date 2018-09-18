@@ -20,6 +20,10 @@ const ncname = '[a-zA-Z_][\\w\\-\\.]*'
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
 const startTagClose = /^\s*(\/?)>/
+/**
+ * 很巧妙的匹配闭合标签的方法
+ * 例子 </ssss>>>>>>   <aw/>>>>>
+ */
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
 // #7298: escape - to avoid being pased as HTML comment when inlined in page
@@ -65,14 +69,19 @@ export function parseHTML (html, options) {
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
+    // 如果没有lastTag，并确保我们不是在一个纯文本内容元素中：script、style、textarea
     if (!lastTag || !isPlainTextElement(lastTag)) {
+      // 查找<的位置
       let textEnd = html.indexOf('<')
+      // 当是第一个的时候
       if (textEnd === 0) {
         // Comment:
+        // 匹配注释文本
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
+            // 当要储存注释时
             if (options.shouldKeepComment) {
               options.comment(html.substring(4, commentEnd))
             }
@@ -82,6 +91,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 兼容另类注释 例子：<！[if！IE]> 
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -92,6 +102,7 @@ export function parseHTML (html, options) {
         }
 
         // Doctype:
+        // <!doctype> 这类开头
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
@@ -99,6 +110,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // 匹配结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -180,7 +192,10 @@ export function parseHTML (html, options) {
 
   // Clean up any remaining tags
   parseEndTag()
-
+  /**
+   * 截取html
+   * index记录多少个
+   */
   function advance (n) {
     index += n
     html = html.substring(n)
