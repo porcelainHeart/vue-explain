@@ -77,7 +77,7 @@ Vue.prototype.$mount = function (
     if (template) {
       /* istanbul ignore if */
       /**
-       * 用于监控开始compile 的性能
+       * 用于监控compile 的性能 
        */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
@@ -94,7 +94,7 @@ Vue.prototype.$mount = function (
 
       /* istanbul ignore if */
        /**
-       * 用于监控结束compile 的性能
+       * 用于监控compile 的性能
        */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')

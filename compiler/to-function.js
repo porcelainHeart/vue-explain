@@ -58,10 +58,14 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
-    // 从缓存取值
+    /**
+     * 是否有模版分隔符
+     * 关于Vue api中delimiters的理解可看 https://stackoverflow.com/questions/33628558/vue-js-change-tags
+     */
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
+    // 从缓存中取值
     if (cache[key]) {
       return cache[key]
     }

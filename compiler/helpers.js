@@ -7,6 +7,10 @@ export function baseWarn (msg: string) {
   console.error(`[Vue compiler]: ${msg}`)
 }
 
+/**
+ * 在modules中查找key并过滤空值
+ * modules不存在时返回[]
+ */
 export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string
