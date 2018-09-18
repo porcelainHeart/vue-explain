@@ -13,10 +13,10 @@
 
 ```
 ./core
-├── components
-│   ├── index.js
-│   └── keep-alive.js
-├── config.js
+├── components ----------------------------------- 已完成
+│   ├── index.js --------------------------------- 已完成
+│   └── keep-alive.js ---------------------------- 已完成
+├── config.js ------------------------------------ 已完成
 ├── global-api ----------------------------------- 已完成
 │   ├── assets.js -------------------------------- 已完成
 │   ├── extend.js -------------------------------- 已完成
@@ -42,10 +42,10 @@
 │   │   ├── resolve-filter.js
 │   │   └── resolve-slots.js
 │   ├── render.js
-│   └── state.js --------------------------------- 进行中
+│   └── state.js ------------------------------------ 进行中
 ├── observer
 │   ├── array.js
-│   ├── dep.js
+│   ├── dep.js -------------------------------------- 已完成
 │   ├── index.js
 │   ├── scheduler.js
 │   ├── traverse.js
@@ -66,9 +66,9 @@
     ├── create-functional-component.js
     ├── helpers
     │   ├── extract-props.js
-    │   ├── get-first-component-child.js
-    │   ├── index.js
-    │   ├── is-async-placeholder.js
+    │   ├── get-first-component-child.js ------------ 已完成
+    │   ├── index.js -------------------------------- 已完成
+    │   ├── is-async-placeholder.js ----------------- 已完成
     │   ├── merge-hook.js
     │   ├── normalize-children.js
     │   ├── resolve-async-component.js
