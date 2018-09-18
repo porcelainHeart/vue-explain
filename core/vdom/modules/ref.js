@@ -4,7 +4,7 @@ import { remove, isDef } from 'shared/util'
 
 /**
  * ref操作
- * 包括添加、删除、销毁
+ * 包括添加、更新、销毁
  */
 export default {
   create (_: any, vnode: VNodeWithData) {
