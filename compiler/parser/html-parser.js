@@ -251,7 +251,7 @@ export function parseHTML (html, options) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
     /**
-     * 是不否是对于web的构建
+     * 是否是对于web的构建
      */ 
     if (expectHTML) {
       /**
