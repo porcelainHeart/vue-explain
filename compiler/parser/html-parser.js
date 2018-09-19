@@ -21,11 +21,12 @@ const ncname = '[a-zA-Z_][\\w\\-\\.]*'
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 /**
  * 匹配开始标签
+ * 例子：<XXXXXX
  */
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
 /**
  * 匹配结束标签
- * 例如(有多个空格的):     />  
+ * 例如(有多个空格的):     />  or XXX>
  */
 const startTagClose = /^\s*(\/?)>/
 /**
@@ -130,7 +131,6 @@ export function parseHTML (html, options) {
         // Start tag:
         /**
          * 获取标签里的match对象
-         * 包含{start: Array<String>, attrs: Array<Array> | [], start: number}
          */
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
@@ -276,6 +276,7 @@ export function parseHTML (html, options) {
     // 获取属性长度属性
     const l = match.attrs.length
     const attrs = new Array(l)
+    // 属性处理
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
@@ -286,15 +287,19 @@ export function parseHTML (html, options) {
         if (args[5] === '') { delete args[5] }
       }
       const value = args[3] || args[4] || args[5] || ''
+      // a标签是否需要解码 !import
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines
       attrs[i] = {
         name: args[1],
+        // 解码
         value: decodeAttr(value, shouldDecodeNewlines)
       }
     }
-
+    /**
+     * 当不是闭合标签的时候缓存该标签用于之后的循环
+     */
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName

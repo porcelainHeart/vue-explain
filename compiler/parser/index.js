@@ -132,19 +132,26 @@ export function parse (
     start (tag, attrs, unary) {
       // check namespace.
       // inherit parent ns if there is one
+      /**
+       * 检查命名空间。如果有父nanmespace，则继承父nanmespace
+       */
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
 
       // handle IE svg bug
       /* istanbul ignore if */
+      // IE的另类bug
       if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
-
+      // 返回应对的AST
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
       }
-
+      /**
+       * 不是服务段渲染的时候，template 应该只负责渲染UI部分
+       * 不应该包含syle， script 的标签
+       */
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -155,6 +162,7 @@ export function parse (
       }
 
       // apply pre-transforms
+      // 预处理
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element
       }
@@ -165,10 +173,12 @@ export function parse (
           inVPre = true
         }
       }
+      // 检测该标签是否需要保留空格
       if (platformIsPreTag(element.tag)) {
         inPre = true
       }
       if (inVPre) {
+        // 当不需要转译时
         processRawAttrs(element)
       } else if (!element.processed) {
         // structural directives
@@ -304,13 +314,20 @@ export function parse (
   })
   return root
 }
-
-function processPre (el) {
+/**
+ * 如果astLists中有pre的话删除astLists中的v-pre
+ * 并打上pre标签
+*/
+ function processPre (el) {
   if (getAndRemoveAttr(el, 'v-pre') != null) {
     el.pre = true
   }
 }
 
+/**
+ * 初始化ast attrs
+ * 并拷贝attrsList值
+ */
 function processRawAttrs (el) {
   const l = el.attrsList.length
   if (l) {
@@ -628,6 +645,9 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
+/**
+ * 返回一个arrts属性的map
+ */
 function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
