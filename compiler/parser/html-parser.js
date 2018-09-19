@@ -269,16 +269,17 @@ export function parseHTML (html, options) {
       }
     }
     /**
-     * 是不是单标签的时候
+     * 是不是自闭和标签的时候
      * 例子: <img>
      */
     const unary = isUnaryTag(tagName) || !!unarySlash
-    // 有多少属性
+    // 获取属性长度属性
     const l = match.attrs.length
     const attrs = new Array(l)
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+      // FF上的很奇怪的bug
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
         if (args[3] === '') { delete args[3] }
         if (args[4] === '') { delete args[4] }
