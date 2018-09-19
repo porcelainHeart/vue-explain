@@ -13,16 +13,25 @@ import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 
 // Regular Expressions for parsing tags and attributes
+// 匹配attributes
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
 const ncname = '[a-zA-Z_][\\w\\-\\.]*'
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+/**
+ * 匹配开始标签
+ * 例子：<XXXXXX
+ */
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
+/**
+ * 匹配结束标签
+ * 例如(有多个空格的):     />  or XXX>
+ */
 const startTagClose = /^\s*(\/?)>/
 /**
  * 很巧妙的匹配闭合标签的方法
- * 例子 </ssss>>>>>>   <aw/>>>>>
+ * 例子 <ssss/>>>>>>>   <aw/>>>>>
  */
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
@@ -120,6 +129,9 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        /**
+         * 获取标签里的match对象
+         */
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -205,16 +217,27 @@ export function parseHTML (html, options) {
     const start = html.match(startTagOpen)
     if (start) {
       const match = {
-        tagName: start[1],
-        attrs: [],
-        start: index
+        tagName: start[1], // 标签名
+        attrs: [], // 属性
+        start: index // 开始位置
       }
-      advance(start[0].length)
+      // 去除标签名
+      advance(start[0].length) 
       let end, attr
+      /**
+       * 当不是结束标签时
+       * 并记录attribute
+       * 例如：<div @click="test"></div> 中的@click="test"
+       * tip: match
+       */
       while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
         advance(attr[0].length)
         match.attrs.push(attr)
       }
+      /**
+       * 当匹配到结束标签时
+       * 返回存进去的match对象
+       */
       if (end) {
         match.unarySlash = end[1]
         advance(end[0].length)
@@ -227,38 +250,56 @@ export function parseHTML (html, options) {
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
-
+    /**
+     * 是否是对于web的构建
+     */ 
     if (expectHTML) {
+      /**
+       * 如果当前的tag不能被p标签包含的的时候就先结束p标签
+       */
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
+      /**
+       * 是不是不闭合的标签
+       * 例子: tr td
+       */
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
         parseEndTag(tagName)
       }
     }
-
+    /**
+     * 是不是自闭和标签的时候
+     * 例子: <img>
+     */
     const unary = isUnaryTag(tagName) || !!unarySlash
-
+    // 获取属性长度属性
     const l = match.attrs.length
     const attrs = new Array(l)
+    // 属性处理
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
+      // FF上的很奇怪的bug
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
         if (args[3] === '') { delete args[3] }
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
       const value = args[3] || args[4] || args[5] || ''
+      // a标签是否需要解码 !import
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines
       attrs[i] = {
         name: args[1],
+        // 解码
         value: decodeAttr(value, shouldDecodeNewlines)
       }
     }
-
+    /**
+     * 当不是闭合标签的时候缓存该标签用于之后的循环
+     */
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
