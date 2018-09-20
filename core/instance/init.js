@@ -71,6 +71,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // 配置项里有el属性, 则会挂载到真实DOM上, 完成视图的渲染
+    // 这里的$mount方法，本质上调用了core/instance/liftcycle.js中的mountComponent方法
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

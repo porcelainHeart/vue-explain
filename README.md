@@ -70,7 +70,7 @@
     │   ├── index.js -------------------------------- 已完成
     │   ├── is-async-placeholder.js ----------------- 已完成
     │   ├── merge-hook.js
-    │   ├── normalize-children.js
+    │   ├── normalize-children.js ------------------- 已完成
     │   ├── resolve-async-component.js
     │   └── update-listeners.js
     ├── modules
