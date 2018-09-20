@@ -60,6 +60,10 @@ const encodedAttr = /&(?:lt|gt|quot|amp);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#10|#9);/g
 
 // #5992
+/**
+ * 可以在pre和textarea元素的开始标记之后立即放置单个换行符。 
+ * 如果元素的内容旨在以换行符开头，则作者需要包含两个连续的换行符。
+ */
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
 const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
@@ -135,6 +139,7 @@ export function parseHTML (html, options) {
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
+          // 是否需要需要新的一行
           if (shouldIgnoreFirstNewline(lastTag, html)) {
             advance(1)
           }
@@ -144,6 +149,10 @@ export function parseHTML (html, options) {
 
       let text, rest, next
       if (textEnd >= 0) {
+        /**
+         * 接下来判断 textEnd 是否大于等于 0 的，满足则说明到从当前位置到 textEnd 位置都是文本
+         * 并且如果 < 是纯文本中的字符，就继续找到真正的文本结束的位置，然后前进到结束的位置。
+         */
         rest = html.slice(textEnd)
         while (
           !endTag.test(rest) &&
@@ -160,7 +169,7 @@ export function parseHTML (html, options) {
         text = html.substring(0, textEnd)
         advance(textEnd)
       }
-
+      // thml解析结束了
       if (textEnd < 0) {
         text = html
         html = ''
@@ -251,7 +260,7 @@ export function parseHTML (html, options) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
     /**
-     * 是不否是对于web的构建
+     * 是否是对于web的构建
      */ 
     if (expectHTML) {
       /**
@@ -304,7 +313,11 @@ export function parseHTML (html, options) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs })
       lastTag = tagName
     }
-
+    /**
+     * 当有start函数时
+     * 主要是对v-for，v-if, v-else-if,v-else,slot,scoped的处理
+     * 检测根标签
+     */
     if (options.start) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }

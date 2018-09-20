@@ -21,6 +21,7 @@ import {
 
 export const onRE = /^@|^v-on:/
 export const dirRE = /^v-|^@|^:/
+// 匹配v-for里的内容
 export const forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/
 export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
@@ -182,8 +183,11 @@ export function parse (
         processRawAttrs(element)
       } else if (!element.processed) {
         // structural directives
+        // 给AST加上v-for响应属性
         processFor(element)
+        // 给AST加上v-if v-else v-else-if相应属性
         processIf(element)
+        // 判断是否含有v-once
         processOnce(element)
         // element-scope stuff
         processElement(element, options)
@@ -191,12 +195,14 @@ export function parse (
 
       function checkRootConstraints (el) {
         if (process.env.NODE_ENV !== 'production') {
+          // 根标签不应该是slot和template
           if (el.tag === 'slot' || el.tag === 'template') {
             warnOnce(
               `Cannot use <${el.tag}> as component root element because it may ` +
               'contain multiple nodes.'
             )
           }
+          // 根标签不应该含有v-for
           if (el.attrsMap.hasOwnProperty('v-for')) {
             warnOnce(
               'Cannot use v-for on stateful component root element because ' +
@@ -207,11 +213,15 @@ export function parse (
       }
 
       // tree management
+      // 赋值给跟标签
       if (!root) {
         root = element
+        //  用于检查根标签
         checkRootConstraints(root)
+        // 缓存中是否有值
       } else if (!stack.length) {
         // allow root elements with v-if, v-else-if and v-else
+        // 如果根元素有v-if, v-else-if and v-else 则打上响应记号
         if (root.if && (element.elseif || element.else)) {
           checkRootConstraints(element)
           addIfCondition(root, {
@@ -230,6 +240,7 @@ export function parse (
         if (element.elseif || element.else) {
           processIfConditions(element, currentParent)
         } else if (element.slotScope) { // scoped slot
+          // 处理slot， scoped传值
           currentParent.plain = false
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
@@ -238,6 +249,7 @@ export function parse (
           element.parent = currentParent
         }
       }
+      // 处理是否是自闭标签
       if (!unary) {
         currentParent = element
         stack.push(element)
@@ -262,11 +274,17 @@ export function parse (
     chars (text: string) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
+           /**
+           * 当文本没有跟标签的时候
+           */
           if (text === template) {
             warnOnce(
               'Component template requires a root element, rather than just text.'
             )
           } else if ((text = text.trim())) {
+            /**
+            * 需要跟标签的时候
+            */
             warnOnce(
               `text "${text}" outside root element will be ignored.`
             )
@@ -276,6 +294,10 @@ export function parse (
       }
       // IE textarea placeholder bug
       /* istanbul ignore if */
+      /**
+       * IE的神奇bug
+       * 如果textarea具有占位符，则IE会触发输入事件
+       */
       if (isIE &&
         currentParent.tag === 'textarea' &&
         currentParent.attrsMap.placeholder === text
@@ -377,9 +399,12 @@ function processRef (el) {
     el.refInFor = checkInFor(el)
   }
 }
-
+/**
+ * 赋值v-for的值给AST
+ */
 export function processFor (el: ASTElement) {
   let exp
+  // 获取v-for的值并剔除他
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const res = parseFor(exp)
     if (res) {
@@ -398,14 +423,37 @@ type ForParseResult = {
   iterator1?: string;
   iterator2?: string;
 };
-
+/**
+ * 提取v-for中的内容
+ * 例子： <div v-for="(value, index) in b"></div>
+ * 返回: {
+ *  for: 'b',
+ *  alias: 'value, index',
+ *  iterator1: 'value',
+ *  iterator2: 'index'
+ * }
+ */
 export function parseFor (exp: string): ?ForParseResult {
+  // 提取v-for里的内容
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) return
   const res = {}
+  /**
+   * 例子 v-for="(value, index) in XXX"
+   * inMatch = [
+   *  '(value, index) in XXX',
+   *  (value, index),
+   *  XXX
+   * ]
+   */
   res.for = inMatch[2].trim()
+  // 去除空格
   const alias = inMatch[1].trim().replace(stripParensRE, '')
   const iteratorMatch = alias.match(forIteratorRE)
+  /**
+   * 判断v-for里是不是单个
+   * 例子: value, index
+   */
   if (iteratorMatch) {
     res.alias = alias.replace(forIteratorRE, '')
     res.iterator1 = iteratorMatch[1].trim()
@@ -417,7 +465,9 @@ export function parseFor (exp: string): ?ForParseResult {
   }
   return res
 }
-
+/**
+ * 赋值v-if, v-else, v-else-if的属性值到AST
+ */
 function processIf (el) {
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
@@ -436,7 +486,9 @@ function processIf (el) {
     }
   }
 }
-
+/**
+ * 当有v-if and v-else(-if) 存在时查找响应的v-if
+ */
 function processIfConditions (el, parent) {
   const prev = findPrevElement(parent.children)
   if (prev && prev.if) {
@@ -451,7 +503,9 @@ function processIfConditions (el, parent) {
     )
   }
 }
-
+/**
+ * 当有v-if and v-else(-if) 存在时查找响应的v-if
+ */
 function findPrevElement (children: Array<any>): ASTElement | void {
   let i = children.length
   while (i--) {
@@ -468,7 +522,7 @@ function findPrevElement (children: Array<any>): ASTElement | void {
     }
   }
 }
-
+// AST添加if条件
 export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   if (!el.ifConditions) {
     el.ifConditions = []
