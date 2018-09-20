@@ -169,7 +169,7 @@ export function parseHTML (html, options) {
         text = html.substring(0, textEnd)
         advance(textEnd)
       }
-      // thml解析结束了
+      // html解析结束了
       if (textEnd < 0) {
         text = html
         html = ''
