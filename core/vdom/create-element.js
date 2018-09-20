@@ -25,6 +25,9 @@ const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
+/**
+ * 创建vnode节点, 本质上是调_createElement方法, 这里做一层封装, 来兼容更多情况
+ */
 export function createElement (
   context: Component,
   tag: any,
@@ -38,11 +41,13 @@ export function createElement (
     children = data
     data = undefined
   }
+  // 根据normalizationType的不同, 后续处理children的方式也不同, 详见core/vdom/helpers/normalzie-children.js
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE
   }
   return _createElement(context, tag, data, children, normalizationType)
 }
+
 
 export function _createElement (
   context: Component,
