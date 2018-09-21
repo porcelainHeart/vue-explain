@@ -21,6 +21,8 @@ import {
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
 
+//初始化Vue时添加一些配置
+//主要是找到祖先节点中的根节点
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
@@ -46,11 +48,17 @@ export function initLifecycle (vm: Component) {
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
-
+//在Vue上挂载一些视图操作方法
+//挂载了视图更新以及组件销毁方法
 export function lifecycleMixin (Vue: Class<Component>) {
+  /**更新视图方法
+   * 这里主要用了vdom的diff算法对传入的vnode和组件本身vnode进行比较
+   * 然后对比较后的vnode打patch生成新的dom节点并完成视图的更新
+  */
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
+      //会调用声明周期中的beforeUpdate回调函数
       callHook(vm, 'beforeUpdate')
     }
     const prevEl = vm.$el
@@ -60,6 +68,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    //若组件本身的vnode未生成,直接用传入的vnode生成dom
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(
@@ -71,6 +80,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // this prevents keeping a detached DOM tree in memory (#5851)
       vm.$options._parentElm = vm.$options._refElm = null
     } else {
+      //对新旧vnode进行diff
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
@@ -90,6 +100,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  //强制更新视图，更新当前依赖和状态
+  //主要用于当前data中变量层次太深，数据改变无法触发渲染视图。
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
