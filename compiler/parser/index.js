@@ -29,7 +29,11 @@ const stripParensRE = /^\(|\)$/g
 const argRE = /:(.*)$/
 export const bindRE = /^:|^v-bind:/
 const modifierRE = /\.[^.]+/g
-
+/**
+ * 创建html缓存
+ * he.decode 对html进行编码 
+ * he包： https://github.com/mathiasbynens/he
+ */
 const decodeHTMLCached = cached(he.decode)
 
 // configurable state
@@ -305,7 +309,9 @@ export function parse (
         return
       }
       const children = currentParent.children
+      // 之前设置的是否需要保留空格
       text = inPre || text.trim()
+        // 当为true时是不是文本标签
         ? isTextTag(currentParent) ? text : decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : preserveWhitespace && children.length ? ' ' : ''
