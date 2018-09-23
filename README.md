@@ -62,7 +62,7 @@
 │   └── props.js ------------------------------------ 已完成
 └── vdom
     ├── create-component.js
-    ├── create-element.js
+    ├── create-element.js --------------------------- 已完成
     ├── create-functional-component.js
     ├── helpers
     │   ├── extract-props.js
@@ -74,9 +74,9 @@
     │   ├── resolve-async-component.js
     │   └── update-listeners.js
     ├── modules
-    │   ├── directives.js
-    │   ├── index.js
-    │   └── ref.js
+    │   ├── directives.js ---------------------------- 已完成
+    │   ├── index.js --------------------------------- 已完成
+    │   └── ref.js ----------------------------------- 已完成
     ├── patch.js ------------------------------------- 进行中
     └── vnode.js ------------------------------------- 已完成
 ```
