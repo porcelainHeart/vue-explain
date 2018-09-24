@@ -582,6 +582,7 @@ export function createPatchFunction (backend) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue, removeOnly) {
+    // 如果oldVnode跟vnode完全一致，那么不需要做任何事情
     if (oldVnode === vnode) {
       return
     }
@@ -596,7 +597,9 @@ export function createPatchFunction (backend) {
       }
       return
     }
-
+    // 如果oldVnode跟vnode都是静态节点，且具有相同的key
+    // 当vnode是克隆节点或是v-once指令控制的节点时
+    // 只需要把oldVnode.elm和oldVnode.child都复制到vnode上，也不用再有其他操作
     // reuse element for static trees.
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
@@ -622,17 +625,23 @@ export function createPatchFunction (backend) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
+    // 如果vnode不是文本节点或注释节点
     if (isUndef(vnode.text)) {
+      // 如果oldVnode和vnode都有子节点，且2方的子节点不完全一致，就执行updateChildren
       if (isDef(oldCh) && isDef(ch)) {
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
+        // 如果只有vnode有子节点，那就创建这些子节点
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
+        // 如果只有oldVnode有子节点，那就把这些节点都删除
       } else if (isDef(oldCh)) {
         removeVnodes(elm, oldCh, 0, oldCh.length - 1)
+        // 如果oldVnode和vnode都没有子节点，但是oldVnode是文本节点或注释节点，就把vnode.elm的文本设置为空字符串
       } else if (isDef(oldVnode.text)) {
         nodeOps.setTextContent(elm, '')
       }
+      // 如果vnode是文本节点或注释节点，但是vnode.text != oldVnode.text时，只需要更新vnode.elm的文本内容即可
     } else if (oldVnode.text !== vnode.text) {
       nodeOps.setTextContent(elm, vnode.text)
     }
