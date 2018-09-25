@@ -652,11 +652,13 @@ function processAttrs (el) {
         value = parseFilters(value)
         isProp = false
         if (modifiers) {
+          // 被用于绑定 DOM 属性 (property)
           if (modifiers.prop) {
             isProp = true
             name = camelize(name)
             if (name === 'innerHtml') name = 'innerHTML'
           }
+          // 将绑定的名称驼峰化
           if (modifiers.camel) {
             name = camelize(name)
           }
@@ -728,7 +730,7 @@ function checkInFor (el: ASTElement): boolean {
 }
 // 处理修饰符
 function parseModifiers (name: string): Object | void {
-  // 是否含有修饰符
+  // 是否含有修饰符， 修饰符： @click.stop
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}

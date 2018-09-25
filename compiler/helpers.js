@@ -59,6 +59,12 @@ export function addHandler (
   modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
   /* istanbul ignore if */
+  /**
+   * 不要把 .passive 和 .prevent 一起使用，因为 .prevent 将会被忽略，同时浏览器可能会向你展示一个警告。
+   * 请记住，.passive 会告诉浏览器你不想阻止事件的默认行为。
+   * 来自 https://cn.vuejs.org/v2/guide/events.html#%E4%BA%8B%E4%BB%B6%E4%BF%AE%E9%A5%B0%E7%AC%A6
+   * 关于passive学习： https://blog.csdn.net/shenlei19911210/article/details/70198771
+   */
   if (
     process.env.NODE_ENV !== 'production' && warn &&
     modifiers.prevent && modifiers.passive
@@ -68,7 +74,10 @@ export function addHandler (
       'Passive handler can\'t prevent default event.'
     )
   }
-
+  /**
+   * 相关解析查看官网
+   * https://cn.vuejs.org/v2/guide/render-function.html#%E4%BA%8B%E4%BB%B6-amp-%E6%8C%89%E9%94%AE%E4%BF%AE%E9%A5%B0%E7%AC%A6
+   */
   // check capture modifier
   if (modifiers.capture) {
     delete modifiers.capture
