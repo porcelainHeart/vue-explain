@@ -25,6 +25,11 @@ export function parseFilters (exp: string): string {
     } else if (inRegex) {
       if (c === 0x2f && prev !== 0x5C) inRegex = false
     } else if (
+      // ascii对照表查： https://www.litefeel.com/tools/ascii.php
+      /**
+       * 匹配到 | 并且只有一个时 防止或 ||
+       * 且不是在 () [] {} 里面
+       */
       c === 0x7C && // pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
@@ -35,6 +40,7 @@ export function parseFilters (exp: string): string {
         lastFilterIndex = i + 1
         expression = exp.slice(0, i).trim()
       } else {
+        // 处理有多个过滤器
         pushFilter()
       }
     } else {
@@ -69,7 +75,7 @@ export function parseFilters (exp: string): string {
   } else if (lastFilterIndex !== 0) {
     pushFilter()
   }
-
+  // 保存filter 数组
   function pushFilter () {
     (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
     lastFilterIndex = i + 1
@@ -77,6 +83,7 @@ export function parseFilters (exp: string): string {
 
   if (filters) {
     for (i = 0; i < filters.length; i++) {
+      // 包装过滤器解析结果
       expression = wrapFilter(expression, filters[i])
     }
   }

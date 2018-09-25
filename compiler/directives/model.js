@@ -33,6 +33,7 @@ export function genComponentModel (
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
  */
+// 设置修饰符async时默认的表达式
 export function genAssignmentCode (
   value: string,
   assignment: string
@@ -66,7 +67,7 @@ type ModelParseResult = {
   exp: string,
   key: string | null
 }
-
+// 包装过滤器后返回的字符串
 export function parseModel (val: string): ModelParseResult {
   // Fix https://github.com/vuejs/vue/pull/7730
   // allow v-model="obj.val " (trailing whitespace)
