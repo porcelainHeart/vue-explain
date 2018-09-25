@@ -130,9 +130,11 @@ export function getBindingAttr (
   getStatic?: boolean
 ): ?string {
   const dynamicValue =
+    // 匹配v-bind或则简易写法
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
   if (dynamicValue != null) {
+    // 处理绑定元素的过滤器
     return parseFilters(dynamicValue)
   } else if (getStatic !== false) {
     const staticValue = getAndRemoveAttr(el, name)

@@ -19,7 +19,9 @@ import {
   pluckModuleFunction
 } from '../helpers'
 
+// 检查属性是否时v-on或则@开头
 export const onRE = /^@|^v-on:/
+// 检查属性是否时v-或则@开头
 export const dirRE = /^v-|^@|^:/
 // 匹配v-for里的内容
 export const forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/
@@ -317,6 +319,11 @@ export function parse (
         : preserveWhitespace && children.length ? ' ' : ''
       if (text) {
         let res
+        /**
+         * 当不是原内容输出时
+         * 并且text不是空内容
+         * 且AST解析时有内容返回
+         */  
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           children.push({
             type: 2,
@@ -373,14 +380,18 @@ function processRawAttrs (el) {
 }
 
 export function processElement (element: ASTElement, options: CompilerOptions) {
+  // AST上添加key
   processKey(element)
 
   // determine whether this is a plain element after
   // removing structural attributes
+  // 2无元素没属性没key
   element.plain = !element.key && !element.attrsList.length
-
+  // AST上添加ref, refInFor
   processRef(element)
+  // AST上添加slotScope
   processSlot(element)
+  // AST上添加component， inlineTemplate
   processComponent(element)
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
@@ -391,6 +402,7 @@ export function processElement (element: ASTElement, options: CompilerOptions) {
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
+    // template 不是实体标签不能有key
     if (process.env.NODE_ENV !== 'production' && el.tag === 'template') {
       warn(`<template> cannot be keyed. Place the key on real elements instead.`)
     }
@@ -402,6 +414,7 @@ function processRef (el) {
   const ref = getBindingAttr(el, 'ref')
   if (ref) {
     el.ref = ref
+    // 处理有for循环时
     el.refInFor = checkInFor(el)
   }
 }
@@ -546,6 +559,7 @@ function processOnce (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+    // slot不是实体标签所以不能加key
     if (process.env.NODE_ENV !== 'production' && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
@@ -558,6 +572,9 @@ function processSlot (el) {
     if (el.tag === 'template') {
       slotScope = getAndRemoveAttr(el, 'scope')
       /* istanbul ignore if */
+      /**
+       * vue2.5更新template标签下的scope为slot-scope
+       */
       if (process.env.NODE_ENV !== 'production' && slotScope) {
         warn(
           `the "scope" attribute for scoped slots have been deprecated and ` +
@@ -567,9 +584,13 @@ function processSlot (el) {
           true
         )
       }
+      // 兼容老版本
       el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope')
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
+      /**
+       * 当不是在templent中slot标签上使用v-for
+       */
       if (process.env.NODE_ENV !== 'production' && el.attrsMap['v-for']) {
         warn(
           `Ambiguous combined usage of slot-scope and v-for on <${el.tag}> ` +
@@ -582,6 +603,7 @@ function processSlot (el) {
     }
     const slotTarget = getBindingAttr(el, 'slot')
     if (slotTarget) {
+      // 处理没复制时的兼容
       el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
       // preserve slot as an attribute for native shadow DOM compat
       // only for non-scoped slots.
@@ -594,9 +616,11 @@ function processSlot (el) {
 
 function processComponent (el) {
   let binding
+  // 是不是动态主键
   if ((binding = getBindingAttr(el, 'is'))) {
     el.component = binding
   }
+  // 是否有内联代码
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true
   }
@@ -608,16 +632,23 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
+    // 检查属性是否时v-或则@开头
     if (dirRE.test(name)) {
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
+      /**
+       * 处理修饰符
+       * 例子：https://v1-cn.vuejs.org/guide/syntax.html#
+       */
       modifiers = parseModifiers(name)
       if (modifiers) {
         name = name.replace(modifierRE, '')
       }
+      // 匹配v-bind
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
+        // 过滤器处理
         value = parseFilters(value)
         isProp = false
         if (modifiers) {
@@ -695,8 +726,9 @@ function checkInFor (el: ASTElement): boolean {
   }
   return false
 }
-
+// 处理修饰符
 function parseModifiers (name: string): Object | void {
+  // 是否含有修饰符
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}

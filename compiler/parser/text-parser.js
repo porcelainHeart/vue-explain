@@ -2,7 +2,7 @@
 
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
-// 匹配默认的分隔符 "{{}}"
+// 匹配默认的分隔符里内容 "{{}}"
 const defaultTagRE = /\{\{((?:.|\n)+?)\}\}/g
 // 匹配默认分隔符
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
