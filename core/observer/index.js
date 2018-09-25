@@ -38,11 +38,19 @@ export class Observer {
   value: any;
   dep: Dep;
   vmCount: number; // number of vms that has this object as root $data
-
+  /**
+   * 生成的Observer实例上挂载三个属性
+   * 1. value, 即观测数据对象本身
+   * 2. dep, 用于依赖收集的容器
+   * 3. vmCount, 直接写死为0
+   */
   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 在观测数据对象上添加__ob__属性, 是Observer实例的引用
+    // def相当于Object.defineProperty, 区别是dep里会把__ob__属性设置为不可枚举
+    // 需要注意的是, value.__ob__.value 显然就是 value 本身, 这里有一个循环引用
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       const augment = hasProto
@@ -60,6 +68,7 @@ export class Observer {
    * getter/setters. This method should only be called when
    * value type is Object.
    */
+  // 用于处理对象类型的观测值, 循环所有的key都调用一次defineReactive
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
@@ -106,13 +115,22 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
+// 用于观测一个数据
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // 对于不是object或者是vnode实例的数据, 直接返回, 不会进行观测
   if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
+  // 如果数据上已有__ob__属性, 说明该数据已经被观测, 不再重复处理
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
+  // 要观测一个数据需要满足以下条件: 
+  // 1. shouldObserve为true, 这是一个标志位, 默认为true, 某些特殊情况下会改成false
+  // 2. !isServerRendering(), 不能是服务端渲染
+  // 3. Array.isArray(value) || isPlainObject(value), 要观测的数据必须是数组或者对象
+  // 4. Object.isExtensible(value). 要观测的数据必须是可扩展的
+  // 5. !value._isVue, 所有vue实例的_isVue属性都为true, 避免观测vue实例对象
   } else if (
     shouldObserve &&
     !isServerRendering() &&

@@ -57,6 +57,7 @@ export function initState (vm: Component) {
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
+  // 如果选项中不存在data，调用observe来观测一个空对象
   if (opts.data) {
     initData(vm)
   } else {
@@ -137,10 +138,14 @@ function initData (vm: Component) {
    * data也可以直接就是一个object, 但仅应该在root组件这样做, 因为直接使用data对象会导致多个相同的组件持有同一个data对象的引用
    * 而使用一个返回新对象的function就可以避免这个问题
    * 详见 https://cn.vuejs.org/v2/style-guide/#%E7%BB%84%E4%BB%B6%E6%95%B0%E6%8D%AE-%E5%BF%85%E8%A6%81
+   * 其实在initData之前的mergeOptions操作中已经将data格式化为一个function
+   * 但是在initData和mergeOptions中间还有一个生命周期钩子beforeCreate被调用
+   * 这里使用typeof再次判断data的类型是为了防止在beforeCreate中改变了vm.$options.data
    */
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // 防止开发者在写data选项时不按规矩返回一个对象
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -156,6 +161,8 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
+  // 检查是否有重复的key， 这里可以看出props优先级最高， 其次是data， 最后是methods
+  // 真的出现重名时，会按照优先级覆盖
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
@@ -172,7 +179,7 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    // 同样要判断是否错误的用了保留key
+    // isReserved用于判断一个key是否以$或者_开头，vue不会在vm上面代理这些key
     } else if (!isReserved(key)) {
       proxy(vm, `_data`, key)
     }
@@ -182,6 +189,11 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+/**
+ * 调用data选项的方法来获取data的值
+ * 如果发生错误则返回空对象
+ * pushTarget与popTarget用于防止使用props数据初始化data数据时收集冗余的依赖
+ */
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
