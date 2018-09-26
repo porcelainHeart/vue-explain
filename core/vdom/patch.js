@@ -476,7 +476,9 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // diff操作核心算法
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
+    // 记录新旧节点列表的首尾元素 用于比较
     let oldStartIdx = 0
     let newStartIdx = 0
     let oldEndIdx = oldCh.length - 1
@@ -490,8 +492,9 @@ export function createPatchFunction (backend) {
     // removeOnly is a special flag used only by <transition-group>
     // to ensure removed elements stay in correct relative positions
     // during leaving transitions
+    // 在transition中 不能移动节点
     const canMove = !removeOnly
-
+    // 检查是否有重复的key
     if (process.env.NODE_ENV !== 'production') {
       checkDuplicateKeys(newCh)
     }
