@@ -415,6 +415,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 递归调用销毁钩子
   function invokeDestroyHook (vnode) {
     let i, j
     const data = vnode.data
