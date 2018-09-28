@@ -149,6 +149,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 /**
  * Define a reactive property on an Object.
  */
+// 定义响应式对象， 给对象动态添加get set拦截方法，
 export function defineReactive (
   obj: Object,
   key: string,
@@ -190,6 +191,7 @@ export function defineReactive (
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
+      // 判断NaN的情况
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
@@ -280,6 +282,7 @@ export function del (target: Array<any> | Object, key: any) {
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
  */
+// 收集数组依赖
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]
