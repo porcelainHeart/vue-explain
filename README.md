@@ -72,7 +72,7 @@
     │   ├── merge-hook.js
     │   ├── normalize-children.js ------------------- 已完成
     │   ├── resolve-async-component.js
-    │   └── update-listeners.js
+    │   └── update-listeners.js --------------------- 已完成
     ├── modules
     │   ├── directives.js ---------------------------- 已完成
     │   ├── index.js --------------------------------- 已完成
