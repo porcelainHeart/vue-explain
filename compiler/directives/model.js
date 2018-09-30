@@ -73,8 +73,12 @@ export function parseModel (val: string): ModelParseResult {
   // allow v-model="obj.val " (trailing whitespace)
   val = val.trim()
   len = val.length
-
+  // 当有中括号，并且不是中括号结尾的
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
+    /**
+     * 当有属性时候
+     * 例子：[a].b
+     */
     index = val.lastIndexOf('.')
     if (index > -1) {
       return {
@@ -82,6 +86,7 @@ export function parseModel (val: string): ModelParseResult {
         key: '"' + val.slice(index + 1) + '"'
       }
     } else {
+      // 没有属性时
       return {
         exp: val,
         key: null
@@ -95,6 +100,7 @@ export function parseModel (val: string): ModelParseResult {
   while (!eof()) {
     chr = next()
     /* istanbul ignore if */
+    // 当碰到单引号或则双引号的时候
     if (isStringStart(chr)) {
       parseString(chr)
     } else if (chr === 0x5B) {
@@ -111,7 +117,7 @@ export function parseModel (val: string): ModelParseResult {
 function next (): number {
   return str.charCodeAt(++index)
 }
-
+// index 是否大于当前长度
 function eof (): boolean {
   return index >= len
 }
@@ -137,7 +143,7 @@ function parseBracket (chr: number): void {
     }
   }
 }
-
+ // 
 function parseString (chr: number): void {
   const stringQuote = chr
   while (!eof()) {
