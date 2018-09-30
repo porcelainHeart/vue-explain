@@ -217,7 +217,9 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
+    // computed可以是一个function 也可以是一个定义了get set方法的object, 这里区分处理
     const getter = typeof userDef === 'function' ? userDef : userDef.get
+    // get方法不存在会出错
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
@@ -225,6 +227,7 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
+    // 对所有computed创建watcher, 在服务端渲染时不能使用watcher
     if (!isSSR) {
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
@@ -238,6 +241,7 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
+    // 校验所有的computed是否与vm上的data, props冲突
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
@@ -256,6 +260,7 @@ export function defineComputed (
   userDef: Object | Function
 ) {
   const shouldCache = !isServerRendering()
+  // 将computed格式化为get set的写法
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
@@ -271,6 +276,7 @@ export function defineComputed (
       ? userDef.set
       : noop
   }
+  // 检查是否有set
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
