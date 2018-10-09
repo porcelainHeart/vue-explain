@@ -33,7 +33,7 @@
 │   ├── proxy.js
 │   ├── render-helpers
 │   │   ├── bind-object-listeners.js
-│   │   ├── bind-object-props.js
+│   │   ├── bind-object-props.js -------------------- 已完成
 │   │   ├── check-keycodes.js
 │   │   ├── index.js
 │   │   ├── render-list.js
