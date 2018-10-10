@@ -3,6 +3,7 @@
 import config from 'core/config'
 import { hyphenate } from 'shared/util'
 
+// 检查数组是否不包含某值
 function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
   if (Array.isArray(expect)) {
     return expect.indexOf(actual) === -1
@@ -16,6 +17,7 @@ function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
  * exposed as Vue.prototype._k
  * passing in eventKeyName as last argument separately for backwards compat
  */
+// 用于检查keyCode是否存在
 export function checkKeyCodes (
   eventKeyCode: number,
   key: string,

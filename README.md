@@ -34,7 +34,7 @@
 │   ├── render-helpers
 │   │   ├── bind-object-listeners.js
 │   │   ├── bind-object-props.js -------------------- 已完成
-│   │   ├── check-keycodes.js
+│   │   ├── check-keycodes.js ----------------------- 已完成
 │   │   ├── index.js
 │   │   ├── render-list.js
 │   │   ├── render-slot.js
