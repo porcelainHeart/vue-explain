@@ -36,7 +36,7 @@
 │   │   ├── bind-object-props.js -------------------- 已完成
 │   │   ├── check-keycodes.js ----------------------- 已完成
 │   │   ├── index.js
-│   │   ├── render-list.js
+│   │   ├── render-list.js -------------------------- 已完成
 │   │   ├── render-slot.js
 │   │   ├── render-static.js
 │   │   ├── resolve-filter.js
