@@ -652,7 +652,11 @@ function processAttrs (el) {
         value = parseFilters(value)
         isProp = false
         if (modifiers) {
-          // 被用于绑定 DOM 属性 (property)
+          /**
+           * 被用于绑定 DOM 属性 (property)
+           * 关于prop： https://stackoverflow.com/questions/6003819/what-is-the-difference-between-properties-and-attributes-in-html#answer-6004028
+           * 
+           */
           if (modifiers.prop) {
             isProp = true
             name = camelize(name)
@@ -663,6 +667,7 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
+            // 添加事件区别原生时间还是自己定义事件
             addHandler(
               el,
               `update:${camelize(name)}`,
@@ -670,32 +675,44 @@ function processAttrs (el) {
             )
           }
         }
+        // 是否使用property
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
+          // 在ASTElement的prorps添加value属性
           addProp(el, name, value)
         } else {
+          // 在ASTElement的Attr添加value属性
           addAttr(el, name, value)
         }
       } else if (onRE.test(name)) { // v-on
+        // 移除@ | v-on
         name = name.replace(onRE, '')
+        // el的events上添加相应方法
         addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
+        /**
+         * 例子:src=XXX
+         * argMatch = [:src=XXX, src=XXX, ...]
+         */
         const argMatch = name.match(argRE)
         const arg = argMatch && argMatch[1]
         if (arg) {
           name = name.slice(0, -(arg.length + 1))
         }
+        // 在el的directives上添加相应属性
         addDirective(el, name, rawName, value, arg, modifiers)
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
+          // 可看 https://stackoverflow.com/questions/42629509/you-are-binding-v-model-directly-to-a-v-for-iteration-alias
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
+        // 检擦有没有是<div id="{{ val }}">这种的
         const res = parseText(value, delimiters)
         if (res) {
           warn(
@@ -786,7 +803,10 @@ function guardIESVGBug (attrs) {
   }
   return res
 }
-
+/**
+ * 检擦v-for中 alias in expression
+ * alias是否有被v-model
+ */
 function checkForAliasModel (el, value) {
   let _el = el
   while (_el) {

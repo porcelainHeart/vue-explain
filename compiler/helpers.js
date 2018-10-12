@@ -19,12 +19,12 @@ export function pluckModuleFunction<F: Function> (
     ? modules.map(m => m[key]).filter(_ => _)
     : []
 }
-
+// ASTElements上添加props里属性
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
   el.plain = false
 }
-
+// ASTElements上添加addAttr里属性
 export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
   el.plain = false
@@ -36,6 +36,7 @@ export function addRawAttr (el: ASTElement, name: string, value: any) {
   el.attrsList.push({ name, value })
 }
 
+// 在el上添加 directives属性
 export function addDirective (
   el: ASTElement,
   name: string,
@@ -47,7 +48,10 @@ export function addDirective (
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
   el.plain = false
 }
-
+/**
+ * 处理点击的修饰符有：capture，passive，once，right，middle，native
+ * 为ASTElement添加具到events里
+ */
 export function addHandler (
   el: ASTElement,
   name: string,
@@ -79,15 +83,21 @@ export function addHandler (
    * https://cn.vuejs.org/v2/guide/render-function.html#%E4%BA%8B%E4%BB%B6-amp-%E6%8C%89%E9%94%AE%E4%BF%AE%E9%A5%B0%E7%AC%A6
    */
   // check capture modifier
+  /**
+   * 即是给元素添加一个监听器，当元素发生冒泡时，先触发带有该修饰符的元素。
+   * 若有多个该修饰符，则由外而内触发。 就是谁有该事件修饰符，就先触发谁。
+   */
   if (modifiers.capture) {
     delete modifiers.capture
     name = '!' + name // mark the event as captured
   }
+  // 只会监听一次事件。
   if (modifiers.once) {
     delete modifiers.once
     name = '~' + name // mark the event as once
   }
   /* istanbul ignore if */
+  // .passive 会告诉浏览器你不想阻止事件的默认行为
   if (modifiers.passive) {
     delete modifiers.passive
     name = '&' + name // mark the event as passive
@@ -96,6 +106,7 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
+  // 鼠标具体按键
   if (name === 'click') {
     if (modifiers.right) {
       name = 'contextmenu'
@@ -106,6 +117,7 @@ export function addHandler (
   }
 
   let events
+  // .native 修饰符就是用来注册元素的原生事件而不是组件自定义事件的
   if (modifiers.native) {
     delete modifiers.native
     events = el.nativeEvents || (el.nativeEvents = {})
