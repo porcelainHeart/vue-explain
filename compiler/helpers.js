@@ -19,12 +19,12 @@ export function pluckModuleFunction<F: Function> (
     ? modules.map(m => m[key]).filter(_ => _)
     : []
 }
-
+// ASTElements上添加props里属性
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
   el.plain = false
 }
-
+// ASTElements上添加addAttr里属性
 export function addAttr (el: ASTElement, name: string, value: any) {
   (el.attrs || (el.attrs = [])).push({ name, value })
   el.plain = false

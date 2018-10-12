@@ -652,7 +652,11 @@ function processAttrs (el) {
         value = parseFilters(value)
         isProp = false
         if (modifiers) {
-          // 被用于绑定 DOM 属性 (property)
+          /**
+           * 被用于绑定 DOM 属性 (property)
+           * 关于prop： https://stackoverflow.com/questions/6003819/what-is-the-difference-between-properties-and-attributes-in-html#answer-6004028
+           * 
+           */
           if (modifiers.prop) {
             isProp = true
             name = camelize(name)
@@ -663,6 +667,7 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
+            // 添加事件区别原生时间还是自己定义事件
             addHandler(
               el,
               `update:${camelize(name)}`,
@@ -670,14 +675,18 @@ function processAttrs (el) {
             )
           }
         }
+        // 是否使用property
         if (isProp || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
+          // 在ASTElement的prorps添加value属性
           addProp(el, name, value)
         } else {
+          // 在ASTElement的Attr添加value属性
           addAttr(el, name, value)
         }
       } else if (onRE.test(name)) { // v-on
+        // 移除@ | v-on
         name = name.replace(onRE, '')
         addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives

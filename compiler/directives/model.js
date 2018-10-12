@@ -86,7 +86,9 @@ export function parseModel (val: string): ModelParseResult {
         key: '"' + val.slice(index + 1) + '"'
       }
     } else {
-      // 没有属性时
+      /**
+       * 没有属性时
+       */
       return {
         exp: val,
         key: null
@@ -103,11 +105,15 @@ export function parseModel (val: string): ModelParseResult {
     // 当碰到单引号或则双引号的时候
     if (isStringStart(chr)) {
       parseString(chr)
+      // 0x5B => [
     } else if (chr === 0x5B) {
       parseBracket(chr)
     }
   }
-
+  /**
+   * expressionPos表示第一个 [ 开始位置的索引
+   * expressionEndPos最后一个 ] 开始位置的索引
+   */
   return {
     exp: val.slice(0, expressionPos),
     key: val.slice(expressionPos + 1, expressionEndPos)
@@ -121,11 +127,11 @@ function next (): number {
 function eof (): boolean {
   return index >= len
 }
-
+// 是否是' "
 function isStringStart (chr: number): boolean {
   return chr === 0x22 || chr === 0x27
 }
-
+// 记录[   ] 索引
 function parseBracket (chr: number): void {
   let inBracket = 1
   expressionPos = index
@@ -136,6 +142,7 @@ function parseBracket (chr: number): void {
       continue
     }
     if (chr === 0x5B) inBracket++
+    // 0x5D => ]
     if (chr === 0x5D) inBracket--
     if (inBracket === 0) {
       expressionEndPos = index
@@ -143,7 +150,7 @@ function parseBracket (chr: number): void {
     }
   }
 }
- // 
+ // 过滤当中字符串
 function parseString (chr: number): void {
   const stringQuote = chr
   while (!eof()) {
