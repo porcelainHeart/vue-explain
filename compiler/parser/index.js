@@ -688,23 +688,31 @@ function processAttrs (el) {
       } else if (onRE.test(name)) { // v-on
         // 移除@ | v-on
         name = name.replace(onRE, '')
+        // el的events上添加相应方法
         addHandler(el, name, value, modifiers, false, warn)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
+        /**
+         * 例子:src=XXX
+         * argMatch = [:src=XXX, src=XXX, ...]
+         */
         const argMatch = name.match(argRE)
         const arg = argMatch && argMatch[1]
         if (arg) {
           name = name.slice(0, -(arg.length + 1))
         }
+        // 在el的directives上添加相应属性
         addDirective(el, name, rawName, value, arg, modifiers)
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
+          // 可看 https://stackoverflow.com/questions/42629509/you-are-binding-v-model-directly-to-a-v-for-iteration-alias
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
       if (process.env.NODE_ENV !== 'production') {
+        // 检擦有没有是<div id="{{ val }}">这种的
         const res = parseText(value, delimiters)
         if (res) {
           warn(
@@ -795,7 +803,10 @@ function guardIESVGBug (attrs) {
   }
   return res
 }
-
+/**
+ * 检擦v-for中 alias in expression
+ * alias是否有被v-model
+ */
 function checkForAliasModel (el, value) {
   let _el = el
   while (_el) {

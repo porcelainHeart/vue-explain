@@ -36,6 +36,7 @@ export function addRawAttr (el: ASTElement, name: string, value: any) {
   el.attrsList.push({ name, value })
 }
 
+// 在el上添加 directives属性
 export function addDirective (
   el: ASTElement,
   name: string,
@@ -47,7 +48,10 @@ export function addDirective (
   (el.directives || (el.directives = [])).push({ name, rawName, value, arg, modifiers })
   el.plain = false
 }
-
+/**
+ * 处理点击的修饰符有：capture，passive，once，right，middle，native
+ * 为ASTElement添加具到events里
+ */
 export function addHandler (
   el: ASTElement,
   name: string,
