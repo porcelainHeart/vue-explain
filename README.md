@@ -69,7 +69,7 @@
     │   ├── get-first-component-child.js ------------ 已完成
     │   ├── index.js -------------------------------- 已完成
     │   ├── is-async-placeholder.js ----------------- 已完成
-    │   ├── merge-hook.js
+    │   ├── merge-hook.js --------------------------- 已完成
     │   ├── normalize-children.js ------------------- 已完成
     │   ├── resolve-async-component.js
     │   └── update-listeners.js --------------------- 已完成
