@@ -65,7 +65,7 @@
     ├── create-element.js --------------------------- 已完成
     ├── create-functional-component.js
     ├── helpers
-    │   ├── extract-props.js
+    │   ├── extract-props.js ------------------------ 已完成
     │   ├── get-first-component-child.js ------------ 已完成
     │   ├── index.js -------------------------------- 已完成
     │   ├── is-async-placeholder.js ----------------- 已完成

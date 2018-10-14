@@ -8,7 +8,7 @@ import {
   hyphenate,
   formatComponentName
 } from 'core/util/index'
-
+// 用于提取组件的props的值
 export function extractPropsFromVNodeData (
   data: VNodeData,
   Ctor: Class<Component>,
@@ -26,6 +26,7 @@ export function extractPropsFromVNodeData (
   if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {
       const altKey = hyphenate(key)
+      // 如果props的key不是横线连接的命名或者驼峰命名, 会展示一个警告信息
       if (process.env.NODE_ENV !== 'production') {
         const keyInLowerCase = key.toLowerCase()
         if (
@@ -42,6 +43,7 @@ export function extractPropsFromVNodeData (
           )
         }
       }
+      // 检查props时不删除, 检查attrs时删除
       checkProp(res, props, key, altKey, true) ||
       checkProp(res, attrs, key, altKey, false)
     }
