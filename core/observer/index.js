@@ -79,6 +79,7 @@ export class Observer {
   /**
    * Observe a list of Array items.
    */
+  // 对数组的每一项进行监听
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
@@ -92,6 +93,7 @@ export class Observer {
  * Augment an target Object or Array by intercepting
  * the prototype chain using __proto__
  */
+// 更改对象或数组的原型链
 function protoAugment (target, src: Object, keys: any) {
   /* eslint-disable no-proto */
   target.__proto__ = src
@@ -103,6 +105,7 @@ function protoAugment (target, src: Object, keys: any) {
  * hidden properties.
  */
 /* istanbul ignore next */
+// 对数组和对象添加隐藏属性
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -250,17 +253,21 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
 /**
  * Delete a property and trigger change if necessary.
  */
+// 用于手动删除属性, 并强制触发响应式更新
 export function del (target: Array<any> | Object, key: any) {
+  // 对不是引用类型的值调用del方法时报错
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 删除正常数组的元素时不需要其他操作, 直接删除即可触发对应的依赖更新
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
   }
   const ob = (target: any).__ob__
+  // 如果试图对vue实例的$data数据进行删除会提示
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid deleting properties on a Vue instance or its root $data ' +
@@ -268,6 +275,7 @@ export function del (target: Array<any> | Object, key: any) {
     )
     return
   }
+  // 如果要删除的字段不存在则直接返回, 否则正常删除并手动触发ob.dep.notify()来通知依赖更新
   if (!hasOwn(target, key)) {
     return
   }
