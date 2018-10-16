@@ -224,16 +224,21 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 数组不需要额外的响应式处理, 只需要更新对应的值即可
+  // 数组的响应式已经用重写Array.prototype上的方法来实现了
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
+
+  // 如果key已存在也不需要做任何处理, 已经是响应式的了
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
   const ob = (target: any).__ob__
+  // 不能在实例上动态添加响应式属性了
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -245,6 +250,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // 添加响应式处理
   defineReactive(ob.value, key, val)
   ob.dep.notify()
   return val
