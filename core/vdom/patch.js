@@ -500,6 +500,9 @@ export function createPatchFunction (backend) {
       checkDuplicateKeys(newCh)
     }
 
+    // 一共分四种情况讨论, 旧列表第一个与新列表第一个对比, 旧列表最后一个与新列表最后一个对比
+    // 然后新列表第一个和旧列表最后一个对比, 新列表最后一个和旧列表第一个对比
+    // 之所以要交叉头尾对比, 是为了防止最差的情况出现
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
@@ -524,6 +527,9 @@ export function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
+        // 以上四种情况都不满足时, 使用新列表第一个vdom的key去旧列表查找
+        // 如果可以找到key相同的元素, 直接进行patch然后进入下一次循环
+        // 找不到则插入一个新节点
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
         idxInOld = isDef(newStartVnode.key)
           ? oldKeyToIdx[newStartVnode.key]
@@ -544,6 +550,9 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       }
     }
+    // 新旧列表其中之一全部循环完成后, 开始清理剩余的节点
+    // 如果旧列表全部遍历完成, 新列表还有剩余, 直接创建这些新节点
+    // 反之, 如果新列表全部遍历, 旧列表还有剩余, 直接删除这些旧节点
     if (oldStartIdx > oldEndIdx) {
       refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
